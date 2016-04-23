@@ -1,0 +1,38 @@
+#!/bin/sh
+set -eu
+exec >Makefile
+fpic=
+libs=
+case `uname` in
+    Darwin)
+        cat <<EOF
+LIBPRE=lib
+SOEXT=.dylib
+SOFLAGS=-dynamiclib
+EOF
+        ;;
+    MSYS*)
+        cat <<EOF
+LIBPRE=
+SOEXT=.dll
+SOFLAGS=-shared -Wl,--out-implib,`echo $@ | sed 's/\.[^.]*\$//'`.lib
+EOF
+        ;;
+    *)
+        cat <<EOF
+LIBPRE=lib
+SOEXT=.so
+SOFLAGS=-shared
+EOF
+        fpic=-fPIC
+        libs=-lrt
+        ;;
+esac
+name=WCLOCK
+cat <<EOF
+wclock_cflags=-D${name}_BUILD $fpic
+wclock_libs=$libs
+EOF
+echo
+# TODO: the 'WCLOCK_SHARED' flag also needs to go into the header somehow!
+cat Makefile.in

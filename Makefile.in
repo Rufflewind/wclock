@@ -1,0 +1,29 @@
+all: $(LIBPRE)wclock$(SOEXT) include/wclock.h
+
+check: bin/wclock_test
+	LD_LIBRARY_PATH=. DYLD_LIBRARY_PATH=. bin/wclock_test
+
+clean:
+	rm -fr -- '$(LIBPRE)wclock$(SOEXT)' bin/wclock_test include/wclock.h include/wclock_config.h src/test_G5O05EO88RMwrVWF1GUh.o src/wclock_TvPL6GdKzQoZL1ovdrCC.o
+
+$(LIBPRE)wclock$(SOEXT): src/wclock_TvPL6GdKzQoZL1ovdrCC.o
+	$(CC) $(CFLAGS) $(SOFLAGS) -o $@ src/wclock_TvPL6GdKzQoZL1ovdrCC.o $(wclock_libs)
+
+bin/wclock_test: $(LIBPRE)wclock$(SOEXT) include/wclock.h src/test_G5O05EO88RMwrVWF1GUh.o
+	@mkdir -p bin
+	$(CC) $(CFLAGS) -L. -o $@ src/test_G5O05EO88RMwrVWF1GUh.o -lwclock
+
+include/wclock.h: include/wclock_config.h src/wclock.h
+	sed -e '3s|/\*\(.*\)\*/|\1|' >$@ <src/wclock.h
+
+include/wclock_config.h: src/wclock_config.h
+	@mkdir -p include
+	sed -e '3s|/\*\(.*\)\*/|\1|' >$@ <src/wclock_config.h
+
+src/test_G5O05EO88RMwrVWF1GUh.o: src/test.c
+	$(CC) $(CPPFLAGS) $(CFLAGS) -Iinclude -c -o $@ src/test.c
+
+src/wclock_TvPL6GdKzQoZL1ovdrCC.o: include/wclock_config.h src/wclock.c src/wclock.h
+	$(CC) $(CPPFLAGS) $(CFLAGS) -include include/wclock_config.h $(wclock_cflags) -c -o $@ src/wclock.c
+
+.PHONY: all check clean
