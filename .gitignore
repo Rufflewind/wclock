@@ -1,4 +1,6 @@
 Makefile
+bin/
+lib/
 include/
 
 # generic

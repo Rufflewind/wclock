@@ -38,7 +38,7 @@ i_wclock = simple_command(
     "sed -e '3s|/\\*\\(.*\\)\\*/|\\1|' >$@ <{0}",
     "include/wclock.h", ["src/wclock.h", wclock_config_h])
 
-l_wclock = build_library("wclock", [
+l_wclock = build_library("lib/wclock", [
     compile_source("src/wclock.c",
                    extra_flags=
                    "-include include/wclock_config.h "
@@ -48,13 +48,13 @@ l_wclock = build_library("wclock", [
 
 testprogram = build_program("bin/wclock_test", [
     compile_source("src/test.c", extra_flags="-Iinclude"),
-], libraries=[Library("wclock")], extra_flags="-L.", extra_deps=[
+], libraries=[Library("wclock")], extra_flags="-Llib", extra_deps=[
     i_wclock,
     l_wclock,
 ])
 
 check = simple_command(
-    "LD_LIBRARY_PATH=. DYLD_LIBRARY_PATH=. {0}", "check",
+    "LD_LIBRARY_PATH=lib DYLD_LIBRARY_PATH=lib {0}", "check",
     [testprogram], phony=True)
 
 alias("all", [
