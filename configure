@@ -11,7 +11,7 @@ SOEXT=.dylib
 SOFLAGS=-dynamiclib
 EOF
         ;;
-    MSYS*)
+    MSYS*|MINGW*)
         cat <<EOF
 LIBPRE=
 SOEXT=.dll

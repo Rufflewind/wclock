@@ -54,7 +54,10 @@ testprogram = build_program("bin/wclock_test", [
 ])
 
 check = simple_command(
-    "LD_LIBRARY_PATH=lib DYLD_LIBRARY_PATH=lib {0}", "check",
+    "LD_LIBRARY_PATH=lib:$$LD_LIBRARY_PATH "
+    "DYLD_LIBRARY_PATH=lib:$$DYLD_LIBRARY_PATH "
+    "PATH=lib:$$PATH "
+    "{0}", "check",
     [testprogram], phony=True)
 
 alias("all", [
