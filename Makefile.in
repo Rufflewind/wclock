@@ -1,12 +1,20 @@
-all: include/wclock.h lib/$(LIBPRE)wclock$(SOEXT)
+all: include/wclock.h lib/$(LIBPRE)wclock$(AREXT) lib/$(LIBPRE)wclock$(SOEXT)
 
 check: bin/wclock_test
 	LD_LIBRARY_PATH=lib:$$LD_LIBRARY_PATH DYLD_LIBRARY_PATH=lib:$$DYLD_LIBRARY_PATH PATH=lib:$$PATH bin/wclock_test
 
 clean:
-	rm -fr -- bin/wclock_test include/wclock.h include/wclock_config.h 'lib/$(LIBPRE)wclock$(SOEXT)' src/test_G5O05EO88RMwrVWF1GUh.o src/wclock_TvPL6GdKzQoZL1ovdrCC.o
+	rm -fr -- bin/wclock_test include/wclock.h include/wclock_config.h 'lib/$(LIBPRE)wclock$(AREXT)' 'lib/$(LIBPRE)wclock$(SOEXT)' src/test_G5O05EO88RMwrVWF1GUh.o src/wclock_TvPL6GdKzQoZL1ovdrCC.o
 
-bin/wclock_test: include/wclock.h lib/$(LIBPRE)wclock$(SOEXT) src/test_G5O05EO88RMwrVWF1GUh.o
+install: include/wclock.h include/wclock_config.h lib/$(LIBPRE)wclock$(AREXT) lib/$(LIBPRE)wclock$(SOEXT)
+	install -d $(DESTDIR)$(PREFIX)/include
+	install -d $(DESTDIR)$(PREFIX)/lib
+	install -c -m644 include/wclock.h $(DESTDIR)$(PREFIX)/include/wclock.h
+	install -c -m644 include/wclock_config.h $(DESTDIR)$(PREFIX)/include/wclock_config.h
+	install -c -m644 lib/$(LIBPRE)wclock$(AREXT) $(DESTDIR)$(PREFIX)/lib/$(LIBPRE)wclock$(AREXT)
+	install -c -m755 lib/$(LIBPRE)wclock$(SOEXT) $(DESTDIR)$(PREFIX)/lib/$(LIBPRE)wclock$(SOEXT)
+
+bin/wclock_test: include/wclock.h lib/$(LIBPRE)wclock$(AREXT) src/test_G5O05EO88RMwrVWF1GUh.o
 	@mkdir -p bin
 	$(CC) $(CFLAGS) -Llib -o $@ src/test_G5O05EO88RMwrVWF1GUh.o -lwclock
 
@@ -16,6 +24,11 @@ include/wclock.h: include/wclock_config.h src/wclock.h
 include/wclock_config.h: src/wclock_config.h
 	@mkdir -p include
 	sed -e '3s|/\*\(.*\)\*/|\1|' >$@ <src/wclock_config.h
+
+lib/$(LIBPRE)wclock$(AREXT): src/wclock_TvPL6GdKzQoZL1ovdrCC.o
+	@mkdir -p lib
+	$(AR) $(ARFLAGS) $@ src/wclock_TvPL6GdKzQoZL1ovdrCC.o
+	$(RANLIB) $@
 
 lib/$(LIBPRE)wclock$(SOEXT): src/wclock_TvPL6GdKzQoZL1ovdrCC.o
 	@mkdir -p lib
@@ -27,4 +40,4 @@ src/test_G5O05EO88RMwrVWF1GUh.o: src/test.c
 src/wclock_TvPL6GdKzQoZL1ovdrCC.o: include/wclock_config.h src/wclock.c src/wclock.h
 	$(CC) $(CPPFLAGS) $(CFLAGS) -include include/wclock_config.h $(wclock_cflags) -c -o $@ src/wclock.c
 
-.PHONY: all check clean
+.PHONY: all check clean install

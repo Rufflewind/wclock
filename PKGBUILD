@@ -23,14 +23,11 @@ pkgver() (
 
 build() {
     cd "$srcdir/$pkgname"
-    ./configure
-    make
+    ./configure --prefix=/usr
+    make all
 }
 
 package() {
     cd "$srcdir/$pkgname"
-    mkdir -p "$pkgdir/usr/include"
-    mkdir -p "$pkgdir/usr/lib"
-    cp -a include/* "$pkgdir/usr/include"
-    cp -a lib/* "$pkgdir/usr/lib"
+    make DESTDIR="$pkgdir" install
 }

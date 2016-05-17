@@ -1,12 +1,64 @@
 #!/bin/sh
 set -eu
+prefix=/usr/local
+for arg
+do
+    case $arg in
+        --prefix=*)
+            prefix=`printf '%s' "$arg" | sed "s/^.\{9\}//"`
+            ;;
+        *)
+            cat >&2 <<EOF
+`basename "$0"`: unknown option: $arg
+EOF
+            exit 1
+            ;;
+    esac
+done
+if [ x"${RANLIB+x}" = x ]; then
+    if command -v ranlib >/dev/null 2>&1; then
+        RANLIB=ranlib
+    else
+        RANLIB=:
+    fi
+fi
 exec >Makefile
+if [ x"${AR+x}" != x ]; then
+    cat <<EOF
+AR=$AR
+EOF
+fi
+if [ x"${ARFLAGS+x}" != x ]; then
+    cat <<EOF
+ARFLAGS=$ARFLAGS
+EOF
+fi
+if [ x"${CC+x}" != x ]; then
+    cat <<EOF
+CC=$CC
+EOF
+fi
+if [ x"${CFLAGS+x}" != x ]; then
+    cat <<EOF
+CFLAGS=$CFLAGS
+EOF
+fi
+if [ x"${CPPFLAGS+x}" != x ]; then
+    cat <<EOF
+CPPFLAGS=$CPPFLAGS
+EOF
+fi
+cat <<EOF
+PREFIX=$prefix
+RANLIB=$RANLIB
+EOF
 fpic=
 libs=
 case `uname` in
     Darwin)
         cat <<EOF
 LIBPRE=lib
+AREXT=.a
 SOEXT=.dylib
 SOFLAGS=-dynamiclib
 EOF
@@ -14,13 +66,15 @@ EOF
     MSYS*|MINGW*)
         cat <<EOF
 LIBPRE=
+AREXT=.lib
 SOEXT=.dll
-SOFLAGS=-shared -Wl,--out-implib,`echo $@ | sed 's/\.[^.]*\$//'`.lib
+SOFLAGS=-shared -Wl,--out-implib,$@.lib
 EOF
         ;;
     *)
         cat <<EOF
 LIBPRE=lib
+AREXT=.a
 SOEXT=.so
 SOFLAGS=-shared
 EOF
