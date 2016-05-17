@@ -8,6 +8,7 @@ url=https://github.com/Rufflewind/wclock
 license=(MIT)
 depends=()
 makedepends=(git)
+options=(staticlibs)
 source=($pkgname::git://github.com/Rufflewind/wclock)
 sha256sums=(SKIP)
 
