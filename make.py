@@ -101,7 +101,7 @@ testprogram = build_program("bin/wclock_test", [
     compile_source("src/test.c", extra_flags="-Iinclude"),
 ], libraries=[Library("wclock")], extra_flags="-Llib", extra_deps=[
     i_wclock,
-    lar_wclock,
+    lso_wclock,
 ])
 
 all_rule = alias("all", [
@@ -111,10 +111,7 @@ all_rule = alias("all", [
 ])
 
 check = simple_command([
-    "LD_LIBRARY_PATH=lib:$$LD_LIBRARY_PATH "
-    "DYLD_LIBRARY_PATH=lib:$$DYLD_LIBRARY_PATH "
-    "PATH=lib:$$PATH "
-    "{0}"
+    "$(LDPATH)=lib:$$$(LDPATH) {0}"
 ], "check", [testprogram], phony=True)
 
 install = install_files([

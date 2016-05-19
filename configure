@@ -61,6 +61,7 @@ LIBPRE=lib
 AREXT=.a
 SOEXT=.dylib
 SOFLAGS=-dynamiclib
+LDPATH=DYLD_LIBRARY_PATH
 EOF
         ;;
     MSYS*|MINGW*)
@@ -69,6 +70,7 @@ LIBPRE=
 AREXT=.lib
 SOEXT=.dll
 SOFLAGS=-shared -Wl,--out-implib,$@.lib
+LDPATH=PATH
 EOF
         ;;
     *)
@@ -77,6 +79,7 @@ LIBPRE=lib
 AREXT=.a
 SOEXT=.so
 SOFLAGS=-shared
+LDPATH=LD_LIBRARY_PATH
 EOF
         fpic=-fPIC
         libs=-lrt

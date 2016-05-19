@@ -1,7 +1,7 @@
 all: include/wclock.h lib/$(LIBPRE)wclock$(AREXT) lib/$(LIBPRE)wclock$(SOEXT)
 
 check: bin/wclock_test
-	LD_LIBRARY_PATH=lib:$$LD_LIBRARY_PATH DYLD_LIBRARY_PATH=lib:$$DYLD_LIBRARY_PATH PATH=lib:$$PATH bin/wclock_test
+	$(LDPATH)=lib:$$$(LDPATH) bin/wclock_test
 
 clean:
 	rm -fr -- bin/wclock_test include/wclock.h include/wclock_config.h 'lib/$(LIBPRE)wclock$(AREXT)' 'lib/$(LIBPRE)wclock$(SOEXT)' src/test_G5O05EO88RMwrVWF1GUh.o src/wclock_TvPL6GdKzQoZL1ovdrCC.o
@@ -14,7 +14,7 @@ install: include/wclock.h include/wclock_config.h lib/$(LIBPRE)wclock$(AREXT) li
 	install -c -m644 lib/$(LIBPRE)wclock$(AREXT) $(DESTDIR)$(PREFIX)/lib/$(LIBPRE)wclock$(AREXT)
 	install -c -m755 lib/$(LIBPRE)wclock$(SOEXT) $(DESTDIR)$(PREFIX)/lib/$(LIBPRE)wclock$(SOEXT)
 
-bin/wclock_test: include/wclock.h lib/$(LIBPRE)wclock$(AREXT) src/test_G5O05EO88RMwrVWF1GUh.o
+bin/wclock_test: include/wclock.h lib/$(LIBPRE)wclock$(SOEXT) src/test_G5O05EO88RMwrVWF1GUh.o
 	@mkdir -p bin
 	$(CC) $(CFLAGS) -Llib -o $@ src/test_G5O05EO88RMwrVWF1GUh.o -lwclock
 
