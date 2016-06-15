@@ -1,11 +1,19 @@
 #!/bin/sh
 set -eu
 prefix=/usr/local
+host=
+uname=`uname`
 for arg
 do
     case $arg in
+        --host=*)
+            host=`printf '%s' "$arg" | sed "s/^[^=]*=//"`
+            ;;
         --prefix=*)
-            prefix=`printf '%s' "$arg" | sed "s/^.\{9\}//"`
+            prefix=`printf '%s' "$arg" | sed "s/^[^=]*=//"`
+            ;;
+        --uname=*)
+            uname=`printf '%s' "$arg" | sed "s/^[^=]*=//"`
             ;;
         *)
             cat >&2 <<EOF
@@ -16,46 +24,42 @@ EOF
     esac
 done
 if [ x"${RANLIB+x}" = x ]; then
-    if command -v ranlib >/dev/null 2>&1; then
-        RANLIB=ranlib
+    if [ x"$host" != x ]; then
+        RANLIB=${host}-ranlib
     else
-        RANLIB=:
+        RANLIB=ranlib
     fi
+    command -v "$RANLIB" >/dev/null 2>&1 || RANLIB=:
 fi
 exec >Makefile
 if [ x"${AR+x}" != x ]; then
-    cat <<EOF
-AR=$AR
-EOF
+    printf 'AR=%s\n' "$AR"
+elif [ x"$host" != x ]; then
+    printf 'AR=%s-ar\n' "$host"
 fi
 if [ x"${ARFLAGS+x}" != x ]; then
-    cat <<EOF
-ARFLAGS=$ARFLAGS
-EOF
+    printf 'ARFLAGS=%s\n' "$ARFLAGS"
 fi
 if [ x"${CC+x}" != x ]; then
-    cat <<EOF
-CC=$CC
-EOF
+    printf 'CC=%s\n' "$CC"
+elif [ x"$host" != x ]; then
+    printf 'CC=%s-cc\n' "$host"
 fi
 if [ x"${CFLAGS+x}" != x ]; then
-    cat <<EOF
-CFLAGS=$CFLAGS
-EOF
+    printf 'CCFLAGS=%s\n' "$CCFLAGS"
 fi
 if [ x"${CPPFLAGS+x}" != x ]; then
-    cat <<EOF
-CPPFLAGS=$CPPFLAGS
-EOF
+    printf 'CPPFLAGS=%s\n' "$CPPFLAGS"
 fi
 cat <<EOF
+HOST=$host
 PREFIX=$prefix
 RANLIB=$RANLIB
 EOF
 fpic=
 libs=
-case `uname` in
-    Darwin)
+case `printf '%s' "$uname" | tr '[:upper:]' '[:lower:]'` in
+    darwin)
         cat <<EOF
 LIBPRE=lib
 AREXT=.a
@@ -64,12 +68,12 @@ SOFLAGS=-dynamiclib
 LDPATH=DYLD_LIBRARY_PATH
 EOF
         ;;
-    MSYS*|MINGW*)
+    msys*|mingw*)
         cat <<EOF
 LIBPRE=
 AREXT=.lib
 SOEXT=.dll
-SOFLAGS=-shared -Wl,--out-implib,$@.lib
+SOFLAGS=-shared -Wl,--out-implib,\$@.lib
 LDPATH=PATH
 EOF
         ;;
